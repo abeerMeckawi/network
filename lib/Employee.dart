@@ -10,7 +10,7 @@ class Employee{
   Employee(this.name,this.age);
 
   Employee.fromJson(Map<String, dynamic>  map) :
-        id = map['id']  ?? "",
+        id = map['id'].toString()  ?? "",
         name = map['employee_name']  ?? "",
         salary = map['employee_salary']  ?? "",
         age = map['employee_age']  ?? "",
@@ -23,4 +23,5 @@ class Employee{
     'employee_age': age,
     'profile_image': image,
   };
+
 }

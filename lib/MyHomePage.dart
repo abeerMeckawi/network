@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:http/http.dart' as http;
-import 'package:dio/dio.dart';
-import 'dart:convert';
+import 'package:network/EmployeeModel.dart';
+import 'package:provider/provider.dart';
 
 import 'AddEmployee.dart';
 import 'Employee.dart';
@@ -17,15 +15,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final Dio dio = Dio();
-
- Future<List<Employee>> getAllEmployee() {
-   return dio.get('http://dummy.restapiexample.com/api/v1/employees').then((d) {
-     print(d.toString());
-
-     return (d.data['data'] as List).map((employee) => Employee.fromJson(employee)).toList();
-   });
- }
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    Provider.of<EmployeeModel>(context, listen: false).getAllEmployee();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,35 +28,33 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Container(
-        child: FutureBuilder(
-         future:getAllEmployee() ,
-          builder: (BuildContext context , AsyncSnapshot snapshot){
-           if(snapshot.data == null){
-             return Container(
-               child: Center(
-                 child: Text("Loading..."),
-               ),
-             );
-           }
-           else {
-             return ListView.builder(
-               itemCount: snapshot.data.length,
-               itemBuilder: (BuildContext context, int index) {
-                 return ListTile(
-                   title: Text(
-                       snapshot.data[index].name
-                   ),
-                   subtitle: Text("Age "+snapshot.data[index].age),
-                 );
-               },
-             );
-           }
-          },
-        ),
-      ),
+      body: FutureBuilder(
+          future: Provider.of<EmployeeModel>(context,listen: false).getAllEmployee(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.data == null) {
+              return Container(
+                child: Center(
+                  child: Text("Loading..."),
+                ),
+              );
+            } else {
+              return Consumer<EmployeeModel>(
+                builder: (context, model, child) {
+                  return ListView.builder(
+                    itemCount: model.employees.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return ListTile(
+                        title: Text(model.employees[index].name),
+                        subtitle: Text("Age " + model.employees[index].age),
+                      );
+                    },
+                  );
+                },
+              );
+            }
+          }),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){
+        onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => NewEmployee()),
